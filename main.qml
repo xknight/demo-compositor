@@ -9,8 +9,14 @@ Compositor {
     ListView {
         anchors.fill: parent
         model: compositor.model
-        delegate: WaylandSurfaceItem {
-            surface: model.displayRole
+        onCountChanged: console.log('count', count)
+        delegate: MouseArea {
+            height: 100
+            anchors { left: parent.left; right: parent.right }
+            WaylandSurfaceItem {
+                surface: model.display
+            }
+            onClicked: console.log('click!')
         }
     }
 

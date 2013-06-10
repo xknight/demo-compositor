@@ -1,6 +1,8 @@
 #include "waylandsurfacemodel.h"
 #include <QWaylandSurface>
 
+#include <QDebug>
+
 class WaylandSurfaceModelPrivate
 {
 friend class WaylandSurfaceModel;
@@ -23,22 +25,36 @@ int WaylandSurfaceModel::rowCount(const QModelIndex &) const
     return d->items.count();
 }
 
+bool WaylandSurfaceModel::insertRow(int row, const QModelIndex &parent)
+{
+    if (row < 0 || row > d->items.count())
+        return false;
+
+    beginInsertRows(QModelIndex(), row, row);
+    d->items.insert(row, 0);
+    endInsertRows();
+    return true;
+}
+
 QVariant WaylandSurfaceModel::data(const QModelIndex &index, int role) const
 {
+    qDebug() << "getData" << index << role;
+
     if (role != Qt::DisplayRole || !index.isValid())
         return QVariant();
 
     return QVariant::fromValue(d->items.at(index.row()));
 }
 
-bool WaylandSurfaceModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool WaylandSurfaceModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
-    if (role != Qt::EditRole || !index.isValid())
+    if (role != Qt::EditRole || !idx.isValid())
         return false;
 
     if (QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(value.value<QObject *>())) {
-        d->items.at(index.row())->deleteLater();
-        d->items[index.row()] = surface;
+        d->items.at(idx.row())->deleteLater();
+        d->items[idx.row()] = surface;
+        emit dataChanged(index(idx.row()), index(idx.row()), QVector<int>() << Qt::DisplayRole);
         return true;
     }
 

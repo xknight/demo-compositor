@@ -20,6 +20,10 @@ public:
 protected:
     void surfaceCreated(QWaylandSurface *surface);
 
+private slots:
+    void surfaceDestroyed();
+
+private:
     CompositorPrivate *d;
 };
 

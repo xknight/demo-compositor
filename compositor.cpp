@@ -29,11 +29,16 @@ QObject *Compositor::model() const
 
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
-    qDebug() << "Surface created" << surface;
     if (d->model.insertRow(d->model.rowCount())) {
         d->model.setData(d->model.index(d->model.rowCount()),
                          QVariant::fromValue(surface));
+        connect(surface, SIGNAL(destroyed(QObject*)), SLOT(surfaceDestroyed()));
     } else {
-        qDebug() << "Unable to add surface to model. Figure out why!";
+        qWarning("Unable to add surface to model.");
     }
+}
+
+void Compositor::surfaceDestroyed()
+{
+    qDebug() << "destroyed";
 }
