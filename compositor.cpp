@@ -14,7 +14,8 @@ friend class Compositor;
 Compositor::Compositor()
     : d(new CompositorPrivate)
 {
-
+    setClientFullScreenHint(true);
+    connect(this, &QQuickWindow::frameSwapped, this, &Compositor::frameFinished);
 }
 
 Compositor::~Compositor()
@@ -27,18 +28,41 @@ QObject *Compositor::model() const
     return &d->model;
 }
 
+void Compositor::resizeEvent(QResizeEvent *event)
+{
+    QQuickWindow::resizeEvent(event);
+    QWaylandCompositor::setOutputGeometry(QRect(0, 0, width(), height()));
+}
+
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
     if (d->model.insertRow(d->model.rowCount())) {
-        d->model.setData(d->model.index(d->model.rowCount()),
-                         QVariant::fromValue(surface));
+        connect(surface, SIGNAL(mapped()), SLOT(surfaceMapped()));
         connect(surface, SIGNAL(destroyed(QObject*)), SLOT(surfaceDestroyed()));
     } else {
         qWarning("Unable to add surface to model.");
     }
 }
 
+void Compositor::surfaceMapped()
+{
+    if (QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender())) {
+
+        qDebug() << "surface mapped" << surface << surface->image().size() << surface->image().format() << surface->image().bytesPerLine();
+
+        if (!surface->hasShellSurface())
+            return;
+
+        d->model.setData(d->model.index(d->model.rowCount() - 1), QVariant::fromValue(surface));
+    }
+}
+
 void Compositor::surfaceDestroyed()
 {
     qDebug() << "destroyed";
+}
+
+void Compositor::frameFinished()
+{
+    QWaylandCompositor::frameFinished();
 }

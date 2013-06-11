@@ -18,12 +18,16 @@ public:
     QObject *model() const;
 
 protected:
+    void resizeEvent(QResizeEvent *);
     void surfaceCreated(QWaylandSurface *surface);
 
 private slots:
+    void surfaceMapped();
     void surfaceDestroyed();
 
 private:
+    void frameFinished();
+
     CompositorPrivate *d;
 };
 

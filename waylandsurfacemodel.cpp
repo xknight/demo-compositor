@@ -38,8 +38,6 @@ bool WaylandSurfaceModel::insertRow(int row, const QModelIndex &parent)
 
 QVariant WaylandSurfaceModel::data(const QModelIndex &index, int role) const
 {
-    qDebug() << "getData" << index << role;
-
     if (role != Qt::DisplayRole || !index.isValid())
         return QVariant();
 
@@ -51,8 +49,12 @@ bool WaylandSurfaceModel::setData(const QModelIndex &idx, const QVariant &value,
     if (role != Qt::EditRole || !idx.isValid())
         return false;
 
+    qDebug() << "setData" << value;
+
     if (QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(value.value<QObject *>())) {
-        d->items.at(idx.row())->deleteLater();
+        if (QWaylandSurface *oldSurface = d->items.at(idx.row()))
+            oldSurface->deleteLater();
+
         d->items[idx.row()] = surface;
         emit dataChanged(index(idx.row()), index(idx.row()), QVector<int>() << Qt::DisplayRole);
         return true;
