@@ -12,7 +12,9 @@ friend class Compositor;
 };
 
 Compositor::Compositor()
-    : d(new CompositorPrivate)
+    : QQuickWindow()
+    , QWaylandCompositor(this)
+    , d(new CompositorPrivate)
 {
     setClientFullScreenHint(true);
     connect(this, &QQuickWindow::frameSwapped, this, &Compositor::frameFinished);
@@ -26,6 +28,15 @@ Compositor::~Compositor()
 QObject *Compositor::model() const
 {
     return &d->model;
+}
+
+void Compositor::setDirectRenderSurface(QWaylandSurface *surface)
+{
+    if (surface) {
+        QWaylandCompositor::setDirectRenderSurface(surface, openglContext());
+    } else {
+        //...
+    }
 }
 
 void Compositor::resizeEvent(QResizeEvent *event)

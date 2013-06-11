@@ -6,6 +6,8 @@ Compositor {
 
     id: compositor
 
+    Component.onCompleted: showFullScreen()
+
     /*ListView {
         anchors.fill: parent
         model: compositor.model
@@ -29,11 +31,22 @@ Compositor {
 
     Column {
         anchors.fill: parent
+        spacing: 50
         Repeater {
             model: compositor.model
 
             WaylandSurfaceItem {
                 surface: model.display
+
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; top: parent.bottom }
+                    height: 50
+                    color: "green";
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: compositor.setDirectRenderSurface(model.display)
+                    }
+                }
             }
         }
     }

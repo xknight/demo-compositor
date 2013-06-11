@@ -17,6 +17,8 @@ public:
 
     QObject *model() const;
 
+    Q_INVOKABLE void setDirectRenderSurface(QWaylandSurface *surface);
+
 protected:
     void resizeEvent(QResizeEvent *);
     void surfaceCreated(QWaylandSurface *surface);
