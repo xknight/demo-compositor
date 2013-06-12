@@ -9,6 +9,7 @@ Compositor {
     Component.onCompleted: showFullScreen()
 
     Grid {
+        id: grid
         anchors.fill: parent
         spacing: 50
         columns: 4
@@ -20,16 +21,13 @@ Compositor {
             WaylandSurfaceItem {
                 id: surfaceItem
                 surface: model.display
+                scale: 0.33
 
                 states: [
                     State {
                         name: "open"
-                        ParentChange { target: surfaceItem; parent: compositor.contentItem; height: compositor.height; width: compositor.width }
-                        /*AnchorChanges {
-                            target: surfaceItem
-                            anchors.left: compositor.left; anchors.right: compositor.right
-                            anchors.top: compositor.top; anchors.bottom: compositor.bottom
-                        }*/
+                        ParentChange { target: surfaceItem; parent: compositor.contentItem }
+                        PropertyChanges { target: surfaceItem; scale: 1 }
                     }
                 ]
 
