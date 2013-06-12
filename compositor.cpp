@@ -32,11 +32,7 @@ QObject *Compositor::model() const
 
 void Compositor::setDirectRenderSurface(QWaylandSurface *surface)
 {
-    if (surface) {
-        QWaylandCompositor::setDirectRenderSurface(surface, openglContext());
-    } else {
-        //...
-    }
+    QWaylandCompositor::setDirectRenderSurface(surface, openglContext());
 }
 
 void Compositor::resizeEvent(QResizeEvent *event)

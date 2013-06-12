@@ -49,8 +49,6 @@ bool WaylandSurfaceModel::setData(const QModelIndex &idx, const QVariant &value,
     if (role != Qt::EditRole || !idx.isValid())
         return false;
 
-    qDebug() << "setData" << value;
-
     if (QWaylandSurface *surface = qobject_cast<QWaylandSurface *>(value.value<QObject *>())) {
         if (QWaylandSurface *oldSurface = d->items.at(idx.row()))
             oldSurface->deleteLater();

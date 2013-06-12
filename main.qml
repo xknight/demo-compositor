@@ -8,44 +8,56 @@ Compositor {
 
     Component.onCompleted: showFullScreen()
 
-    /*ListView {
-        anchors.fill: parent
-        model: compositor.model
-        onCountChanged: console.log('count', count)
-        delegate: MouseArea {
-            height: 100
-            anchors { left: parent.left; right: parent.right }
-            Rectangle {
-                anchors.fill: parent
-                color: "#ccc"
-            }
-            WaylandSurfaceItem {
-                anchors.fill: parent
-                touchEventsEnabled: true
-                surface: model.display
-                resizeSurfaceToItem: true
-            }
-            onClicked: console.log('click!')
-        }
-    }*/
-
-    Column {
+    Grid {
         anchors.fill: parent
         spacing: 50
+        columns: 4
+        rows: 3
+
         Repeater {
             model: compositor.model
 
             WaylandSurfaceItem {
+                id: surfaceItem
                 surface: model.display
 
-                Rectangle {
-                    anchors { left: parent.left; right: parent.right; top: parent.bottom }
-                    height: 50
-                    color: "green";
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: compositor.setDirectRenderSurface(model.display)
+                states: [
+                    State {
+                        name: "open"
+                        ParentChange { target: surfaceItem; parent: compositor.contentItem; height: compositor.height; width: compositor.width }
+                        /*AnchorChanges {
+                            target: surfaceItem
+                            anchors.left: compositor.left; anchors.right: compositor.right
+                            anchors.top: compositor.top; anchors.bottom: compositor.bottom
+                        }*/
                     }
+                ]
+
+                transitions: [
+                    Transition {
+                        to: "open"
+                        SequentialAnimation {
+                            NumberAnimation {
+                                target: surfaceItem; properties: "x,y,width,height"; duration: 1000
+                            }
+                            ScriptAction { script: compositor.setDirectRenderSurface(model.display) }
+                        }
+                    },
+                    Transition {
+                        from: "open"
+                        SequentialAnimation {
+                            ScriptAction { script: compositor.setDirectRenderSurface(null) }
+                            NumberAnimation {
+                                target: surfaceItem; properties: "x,y,width,height"; duration: 1000
+                            }
+                        }
+                    }
+                ]
+
+                MouseArea {
+                    anchors { fill: parent }
+                    height: 50
+                    onClicked: surfaceItem.state = (surfaceItem.state == "open") ? "" : "open";
                 }
             }
         }
