@@ -6,59 +6,72 @@ Compositor {
 
     id: compositor
 
-    Component.onCompleted: showFullScreen()
+    visibility: Compositor.FullScreen
 
     Grid {
         id: grid
+        property var transformOrigins: [
+            Item.TopLeft, Item.Top, Item.TopRight,
+            Item.Left, Item.Center, Item.Right,
+            Item.BottomLeft, Item.Bottom, Item.BottomRight
+        ]
+
+        z: -1
+
         anchors.fill: parent
-        spacing: 50
-        columns: 4
-        rows: 3
 
         Repeater {
             model: compositor.model
+            MouseArea {
+                id: mouseArea
+                width: grid.width / 3
+                height: grid.height / 3
 
-            WaylandSurfaceItem {
-                id: surfaceItem
-                surface: model.display
-                scale: 0.33
+                onClicked: surfaceItem.state = (surfaceItem.state == "open") ? "" : "open";
 
-                states: [
-                    State {
-                        name: "open"
-                        ParentChange { target: surfaceItem; parent: compositor.contentItem }
-                        PropertyChanges { target: surfaceItem; scale: 1 }
-                    }
-                ]
+                Rectangle {
+                    anchors.fill: parent
+                    color: "red"
+                    z: -2
+                }
 
-                transitions: [
-                    Transition {
-                        to: "open"
-                        SequentialAnimation {
-                            NumberAnimation {
-                                target: surfaceItem; properties: "x,y,width,height"; duration: 1000
-                            }
-                            ScriptAction { script: compositor.setDirectRenderSurface(model.display) }
+                WaylandSurfaceItem {
+                    id: surfaceItem
+                    surface: model.display
+                    enabled: false
+                    clientRenderingEnabled: (compositor.directRenderSurface == null)
+                                            || (compositor.directRenderSurface == model.display)
+                    onClientRenderingEnabledChanged: console.log(surfaceItem, clientRenderingEnabled)
+
+                    transformOrigin: Item.Center
+                    anchors.centerIn: parent
+                    scale: 0.33
+
+                    states: [
+                        State {
+                            name: "open"
+                            ParentChange { target: surfaceItem; parent: compositor.contentItem; scale: 1 }
                         }
-                    },
-                    Transition {
-                        from: "open"
-                        SequentialAnimation {
-                            ScriptAction { script: compositor.setDirectRenderSurface(null) }
-                            NumberAnimation {
-                                target: surfaceItem; properties: "x,y,width,height"; duration: 1000
+                    ]
+
+                    transitions: [
+                        Transition {
+                            to: "open"
+                            SequentialAnimation {
+                                NumberAnimation { properties: "x,y,scale"; duration: 1000 }
+                                ScriptAction { script: compositor.directRenderSurface = model.display }
+                            }
+                        },
+                        Transition {
+                            from: "open"
+                            SequentialAnimation {
+                                ScriptAction { script: compositor.directRenderSurface = null }
+                                NumberAnimation { properties: "x,y,scale"; duration: 1000 }
                             }
                         }
-                    }
-                ]
-
-                MouseArea {
-                    anchors { fill: parent }
-                    height: 50
-                    onClicked: surfaceItem.state = (surfaceItem.state == "open") ? "" : "open";
+                    ]
                 }
             }
         }
     }
-
 }

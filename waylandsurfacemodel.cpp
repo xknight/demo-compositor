@@ -60,3 +60,8 @@ bool WaylandSurfaceModel::setData(const QModelIndex &idx, const QVariant &value,
 
     return false;
 }
+
+QList<QWaylandSurface *> WaylandSurfaceModel::items() const
+{
+    return d->items;
+}

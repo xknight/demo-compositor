@@ -10,6 +10,7 @@
 
 int main(int argc, char *argv[])
 {
+    qmlRegisterRevision<QWindow, 1>("Compositor", 1, 0);
     qmlRegisterType<QWaylandSurfaceItem>("QtQuick.Compositor", 1, 0, "WaylandSurfaceItem");
     qmlRegisterType<QWaylandSurface>("QtQuick.Compositor", 1, 0, "WaylandSurface");
     qmlRegisterType<Compositor>("Compositor", 1, 0, "Compositor");

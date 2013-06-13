@@ -32,7 +32,12 @@ QObject *Compositor::model() const
 
 void Compositor::setDirectRenderSurface(QWaylandSurface *surface)
 {
+    if (surface == directRenderSurface())
+        return;
+
     QWaylandCompositor::setDirectRenderSurface(surface, openglContext());
+
+    emit directRenderSurfaceChanged();
 }
 
 void Compositor::resizeEvent(QResizeEvent *event)
@@ -43,24 +48,21 @@ void Compositor::resizeEvent(QResizeEvent *event)
 
 void Compositor::surfaceCreated(QWaylandSurface *surface)
 {
-    if (d->model.insertRow(d->model.rowCount())) {
-        connect(surface, SIGNAL(mapped()), SLOT(surfaceMapped()));
-        connect(surface, SIGNAL(destroyed(QObject*)), SLOT(surfaceDestroyed()));
-    } else {
-        qWarning("Unable to add surface to model.");
-    }
+    connect(surface, SIGNAL(mapped()), SLOT(surfaceMapped()));
+    connect(surface, SIGNAL(destroyed(QObject*)), SLOT(surfaceDestroyed()));
 }
 
 void Compositor::surfaceMapped()
 {
     if (QWaylandSurface *surface = qobject_cast<QWaylandSurface*>(sender())) {
-
-        qDebug() << "surface mapped" << surface << surface->image().size() << surface->image().format() << surface->image().bytesPerLine();
-
         if (!surface->hasShellSurface())
             return;
 
-        d->model.setData(d->model.index(d->model.rowCount() - 1), QVariant::fromValue(surface));
+        if (d->model.insertRow(d->model.rowCount())) {
+            d->model.setData(d->model.index(d->model.rowCount() - 1), QVariant::fromValue(surface));
+        } else {
+            qWarning("Unable to add surface to model.");
+        }
     }
 }
 

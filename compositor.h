@@ -10,6 +10,7 @@ class Compositor : public QQuickWindow, public QWaylandCompositor
 {
     Q_OBJECT
     Q_PROPERTY(QObject * model READ model CONSTANT)
+    Q_PROPERTY(QWaylandSurface * directRenderSurface READ directRenderSurface WRITE setDirectRenderSurface NOTIFY directRenderSurfaceChanged)
 
 public:
     explicit Compositor();
@@ -17,11 +18,14 @@ public:
 
     QObject *model() const;
 
-    Q_INVOKABLE void setDirectRenderSurface(QWaylandSurface *surface);
+    void setDirectRenderSurface(QWaylandSurface *surface);
 
 protected:
     void resizeEvent(QResizeEvent *);
     void surfaceCreated(QWaylandSurface *surface);
+
+signals:
+    void directRenderSurfaceChanged();
 
 private slots:
     void surfaceMapped();
