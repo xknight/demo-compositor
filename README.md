@@ -5,6 +5,7 @@ This is a demo QtWayland compositor built to demonstrate the page-flipping/direc
 You need Linux, Qt 5.1, and QtWayland (stable branch) to use this. Build with:
 
 qmake
+
 make
 
 Run with:
